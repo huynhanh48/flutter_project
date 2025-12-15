@@ -4,49 +4,27 @@ void main() {
   runApp(const MyApp());
 }
 
+/// ================= APP ROOT =================
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Drawer + Pages',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Drawer Navigation'),
     );
   }
 }
 
+/// ================= HOME PAGE =================
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -54,67 +32,68 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  // page index
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  // pages
+  final List<Widget> _pages = const [HomePage(), SettingsPage(), AboutPage()];
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
 
-      // Drawer
+      /// -------- DRAWER --------
       drawer: Drawer(
         child: Column(
           children: [
-            // Header đẹp
             UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Colors.deepPurple, Colors.purpleAccent],
                 ),
               ),
-              currentAccountPicture: CircleAvatar(
+              currentAccountPicture: const CircleAvatar(
                 backgroundColor: Colors.white,
-                child: Icon(Icons.person, size: 40, color: Colors.deepPurple),
+                child: Icon(Icons.person, size: 40),
               ),
-              accountName: Text("Anh Developer"),
-              accountEmail: Text("anh@example.com"),
+              accountName: const Text("Anh Developer"),
+              accountEmail: const Text("anh@example.com"),
             ),
 
-            // Item menu
             _drawerItem(
               icon: Icons.home,
               text: "Home",
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                setState(() => _selectedIndex = 0);
+                Navigator.pop(context);
+              },
             ),
 
-            _drawerItem(icon: Icons.settings, text: "Settings", onTap: () {}),
+            _drawerItem(
+              icon: Icons.settings,
+              text: "Settings",
+              onTap: () {
+                setState(() => _selectedIndex = 1);
+                Navigator.pop(context);
+              },
+            ),
 
-            _drawerItem(icon: Icons.info, text: "About", onTap: () {}),
+            _drawerItem(
+              icon: Icons.info,
+              text: "About",
+              onTap: () {
+                setState(() => _selectedIndex = 2);
+                Navigator.pop(context);
+              },
+            ),
 
             const Spacer(),
+            const Divider(),
 
-            // Logout
-            Divider(),
             _drawerItem(
               icon: Icons.logout,
               text: "Logout",
@@ -125,28 +104,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
 
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      /// -------- BODY --------
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _pages[_selectedIndex],
       ),
     );
   }
 }
 
+/// ================= DRAWER ITEM =================
 Widget _drawerItem({
   required IconData icon,
   required String text,
@@ -155,7 +122,122 @@ Widget _drawerItem({
 }) {
   return ListTile(
     leading: Icon(icon, color: color),
-    title: Text(text, style: TextStyle(fontSize: 16, color: color)),
+    title: Text(text, style: TextStyle(color: color, fontSize: 16)),
     onTap: onTap,
+  );
+}
+
+/// ================= HOME PAGE =================
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return _centerContent(
+      icon: Icons.home,
+      title: "HOME",
+      subtitle: "Đây là trang Home",
+    );
+  }
+}
+
+/// ================= SETTINGS PAGE =================
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool darkMode = false;
+  bool notification = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const Text(
+          "SETTINGS",
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 20),
+
+        Card(
+          child: SwitchListTile(
+            title: const Text("Dark Mode"),
+            subtitle: const Text("Bật giao diện tối"),
+            value: darkMode,
+            onChanged: (v) => setState(() => darkMode = v),
+          ),
+        ),
+
+        Card(
+          child: SwitchListTile(
+            title: const Text("Notification"),
+            subtitle: const Text("Bật thông báo"),
+            value: notification,
+            onChanged: (v) => setState(() => notification = v),
+          ),
+        ),
+
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("Account"),
+            subtitle: const Text("Thông tin tài khoản"),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text("Account clicked")));
+            },
+          ),
+        ),
+
+        const SizedBox(height: 30),
+        const Center(
+          child: Text("Version 1.0.0", style: TextStyle(color: Colors.grey)),
+        ),
+      ],
+    );
+  }
+}
+
+/// ================= ABOUT PAGE =================
+class AboutPage extends StatelessWidget {
+  const AboutPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return _centerContent(
+      icon: Icons.info,
+      title: "ABOUT",
+      subtitle: "Ứng dụng Flutter Drawer Demo",
+    );
+  }
+}
+
+/// ================= COMMON UI =================
+Widget _centerContent({
+  required IconData icon,
+  required String title,
+  required String subtitle,
+}) {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 80, color: Colors.deepPurple),
+        const SizedBox(height: 16),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(subtitle, style: const TextStyle(fontSize: 16)),
+      ],
+    ),
   );
 }
